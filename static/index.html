@@ -1,0 +1,95 @@
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+  <style>
+    #drop_zone {
+      border: 5px solid blue;
+      width:  200px;
+      height: 100px;
+    }
+  </style>
+</head>
+<body>
+    <div id="drop_zone" ondrop="dropHandler(event);" ondragover="dragOverHandler(event);">
+      <p>Drag one or more files to this Drop Zone ...</p>
+    </div>
+    <button onclick="handleClickUpload()" >optimize</button>
+    <button disable onclick="handleClickDownloadAll()"> download all </button>
+    <div id="files_list">
+
+    </div>
+  <script>
+    let files = []
+    let response = []
+    let {files_list} = window
+    function dragOverHandler(ev) {
+      console.log('File(s) in drop zone'); 
+
+      // Prevent default behavior (Prevent file from being opened)
+      ev.preventDefault();
+    }
+    function dropHandler(ev) {
+      console.log('File(s) dropped');
+
+      // Prevent default behavior (Prevent file from being opened)
+      ev.preventDefault();
+
+      if (ev.dataTransfer.items && ev.dataTransfer.items.length) {
+
+        files = files.concat(
+          Array.prototype.filter.call(ev.dataTransfer.items, item => item.kind === 'file')
+            .map(item => item.getAsFile())
+        )
+        console.dir(files)
+        files_list.innerHTML = files.map(file => `<p>${file.name}</p>\n`).join('')
+      }
+    }
+    function handleClickUpload() {
+      handleFiles(files)
+    }
+    function handleFiles(files) {
+      Promise.all(([...files]).map(uploadFile)).then(res=> {
+        response = res
+        console.log(res)
+      })
+    }
+    function uploadFile(file) {
+      let url = 'http://localhost:3000/file-upload'
+      let formData = new FormData()
+      formData.append('file', file)
+      return fetch(url, {
+        method: 'POST',
+        body: formData
+      })
+      .then((res) => res.json())
+      .catch((err) => console.log(err))
+    }
+    function handleClickDownloadAll () {
+      if(response.length) {
+        let url = 'http://localhost:3000/file-download'
+        return fetch(url, {
+          method: 'POST',
+          headers:{
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(response)
+        })
+        .then(response => response.blob())
+        .then(blob => {
+            var url = window.URL.createObjectURL(blob);
+            var a = document.createElement('a');
+            a.href = url;
+            a.download = "all.zip";
+            document.body.appendChild(a); // we need to append the element to the dom -> otherwise it will not work in firefox
+            a.click();    
+            a.remove();  //afterwards we remove the element again         
+        })
+        .catch((err) => console.log(err))
+      }
+    }
+  </script>
+</body>
+</html>

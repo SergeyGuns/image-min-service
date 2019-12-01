@@ -1,0 +1,7 @@
+/node_modules
+package-lock.json
+/sourceImage
+/distImage
+yarn.lock
+/static/minified/*.png
+/uploadFiles/*.png
