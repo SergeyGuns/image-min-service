@@ -54,7 +54,15 @@ app.use("/file-download", function(req, res) {
       files,
       filename: "zip-file-name.zip"
     })
-    .then(res => console.log(files));
+    .then(res => {
+      console.log(res);
+      files.map(file =>
+        searchAndDeleteFiles(
+          __dirname + "/" + uploadFiles,
+          __dirname + "/" + distImags
+        )(file.name)
+      );
+    });
 });
 
 app.listen(port, () => console.log(`Example app listening on port ${port}!`));
@@ -70,4 +78,21 @@ async function minify(file) {
     ]
   });
   return resFile[0].destinationPath;
+}
+
+function searchAndDeleteFiles(...dirs) {
+  return function(originFileName) {
+    dirs.map(dir =>
+      fs.readdir(dir, (err, fileList) => {
+        if (err) return console.log(err);
+        fileList.map(file => {
+          if (file.indexOf(originFileName) !== -1) {
+            fs.unlink(dir + "/" + file, err => {
+              if (err) return console.log(err);
+            });
+          }
+        });
+      })
+    );
+  };
 }
