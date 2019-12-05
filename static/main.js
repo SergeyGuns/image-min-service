@@ -36,20 +36,22 @@ function renderFiles(files) {
 function handleClickUpload() {
   handleFiles(files);
 }
-function fileStatusOK(index) {
+function setStatusOK(index) {
   files = files.map((file, i) => {
     file.status = index === i ? STATUS.OK : file.status;
     return file;
   });
   renderFiles(files);
 }
-async function handleFiles(files) {
-  files = files.map(file => {
-    file.status = STATUS.PENDING;
+function setStatusPending(index) {
+  files = files.map((file, i) => {
+    file.status = index === i ? STATUS.PENDING : file.status;
     return file;
   });
   renderFiles(files);
-  const fns = [...files].map(uploadFile(fileStatusOK));
+}
+async function handleFiles(files) {
+  const fns = [...files].map(uploadFile(setStatusOK));
   for await (fn of fns) {
     const result = await fn();
     response.push(result);
@@ -58,6 +60,7 @@ async function handleFiles(files) {
 function uploadFile(cb) {
   return function(file, index) {
     return function() {
+      setStatusPending(index);
       let url = "/file-upload";
       let formData = new FormData();
       formData.append("file", file);

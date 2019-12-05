@@ -15,7 +15,7 @@ body {
 }
 
 .status--ok {
-  animation: ok 1s both;
+  animation: ok .01s both;
 }
 
 @keyframes pending {
