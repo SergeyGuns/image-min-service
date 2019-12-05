@@ -50,7 +50,7 @@ function uploadFile(file) {
 }
 function handleClickDownloadAll() {
   if (response.length) {
-    let url = "http://localhost:3000/file-download";
+    let url = "/file-download";
     return fetch(url, {
       method: "POST",
       headers: {
