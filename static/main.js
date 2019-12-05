@@ -37,7 +37,7 @@ async function handleFiles(files) {
 }
 function uploadFile(file) {
   return function() {
-    let url = "http://localhost:3000/file-upload";
+    let url = "/file-upload";
     let formData = new FormData();
     formData.append("file", file);
     return fetch(url, {

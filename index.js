@@ -55,7 +55,6 @@ app.use("/file-download", function(req, res) {
       filename: "zip-file-name.zip"
     })
     .then(res => {
-      console.log(res);
       files.map(file =>
         searchAndDeleteFiles(
           __dirname + "/" + uploadFiles,
