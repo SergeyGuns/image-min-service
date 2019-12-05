@@ -1,6 +1,10 @@
 let files = [];
 let errStatus = null;
 let response = [];
+const STATUS = {
+  PENDING: "pending",
+  OK: "ok"
+};
 let { files_list } = window;
 function dragOverHandler(ev) {
   console.log("File(s) in drop zone");
@@ -21,31 +25,52 @@ function dropHandler(ev) {
         .map(item => item.getAsFile())
     );
     console.dir(files);
-    files_list.innerHTML = files.map(file => `<p>${file.name}</p>\n`).join("");
+    renderFiles(files);
   }
+}
+function renderFiles(files) {
+  files_list.innerHTML = files
+    .map(file => `<p class='status--${file.status}'>${file.name}</p>\n`)
+    .join("");
 }
 function handleClickUpload() {
   handleFiles(files);
 }
+function fileStatusOK(index) {
+  files = files.map((file, i) => {
+    file.status = index === i ? STATUS.OK : file.status;
+    return file;
+  });
+  renderFiles(files);
+}
 async function handleFiles(files) {
-  const fns = [...files].map(uploadFile);
+  files = files.map(file => {
+    file.status = STATUS.PENDING;
+    return file;
+  });
+  renderFiles(files);
+  const fns = [...files].map(uploadFile(fileStatusOK));
   for await (fn of fns) {
     const result = await fn();
     response.push(result);
-    console.log(result);
   }
 }
-function uploadFile(file) {
-  return function() {
-    let url = "/file-upload";
-    let formData = new FormData();
-    formData.append("file", file);
-    return fetch(url, {
-      method: "POST",
-      body: formData
-    })
-      .then(res => res.json())
-      .catch(err => console.log(err));
+function uploadFile(cb) {
+  return function(file, index) {
+    return function() {
+      let url = "/file-upload";
+      let formData = new FormData();
+      formData.append("file", file);
+      return fetch(url, {
+        method: "POST",
+        body: formData
+      })
+        .then(res => {
+          cb(index);
+          return res.json();
+        })
+        .catch(err => console.log(err));
+    };
   };
 }
 function handleClickDownloadAll() {

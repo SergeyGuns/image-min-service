@@ -1,0 +1,30 @@
+#drop_zone {
+  border: 5px solid blue;
+  width:  100vw;
+  height: 50vh;
+}
+body {
+  padding: 0;
+  margin: 0;
+}
+* {
+  box-sizing: border-box;
+}
+.status--pending {
+  animation: pending .5s infinite alternate;
+}
+
+.status--ok {
+  animation: ok 1s both;
+}
+
+@keyframes pending {
+  to {
+    background-color: rgba(251, 255, 0, 0.582);
+  }
+}
+@keyframes ok {
+  to {
+    background-color: rgba(0, 255, 21, 0.582);
+  }
+}
